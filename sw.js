@@ -1,4 +1,4 @@
-const CACHE = "esp-v1";
+const CACHE = "esp-v3";
 const ASSETS = [
   "/spanish-words/",
   "/spanish-words/index.html",
@@ -18,6 +18,12 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match("/spanish-words/index.html"))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
