@@ -54,19 +54,23 @@
       } catch {}
     }
 
+    // localStorage першим — він надійніший на Android/PWA
     async function loadProgress() {
-      const fromIDB = await dbGet("progress");
-      if (fromIDB && Object.keys(fromIDB).length > 0) return fromIDB;
       try {
         const raw = localStorage.getItem(LS_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Object.keys(parsed).length > 0) return parsed;
+        }
       } catch {}
+      const fromIDB = await dbGet("progress");
+      if (fromIDB && Object.keys(fromIDB).length > 0) return fromIDB;
       return {};
     }
 
     async function saveProgress(data) {
-      await dbSet("progress", data);
       try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+      await dbSet("progress", data);
     }
   </script>
   <script type="text/babel">
