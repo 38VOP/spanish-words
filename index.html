@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Іспанські слова v2.0</title>
+  <title>Іспанські слова v2.1</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0f1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -19,7 +19,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <script>
-    const APP_VERSION = "v2.0";
+    const APP_VERSION = "v2.1";
     const DB_NAME = "esp_db", DB_VER = 1, STORE = "kv";
     const LS_KEY = "esp_progress";
 
@@ -245,13 +245,23 @@
       return { left, right, pairs: picked };
     }
 
+    // Шукаємо іспанський голос явно, щоб уникнути англійського акценту
     function speak(text) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "es-ES";
-      u.rate = 0.9;
+      u.rate = 0.85;
+      const voices = window.speechSynthesis.getVoices();
+      const esVoice = voices.find(v => v.lang.startsWith("es") && !v.lang.startsWith("es-US"))
+                   || voices.find(v => v.lang.startsWith("es"));
+      if (esVoice) u.voice = esVoice;
       window.speechSynthesis.speak(u);
+    }
+
+    // Голоси можуть завантажуватись асинхронно — чекаємо
+    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
     function App() {
